@@ -1,0 +1,3 @@
+A set of utilities for working with the Vortex Content Management system developed at the University of Oslo, Norway. 
+
+Author: Thomas Flemming thomas.flemming(at)usit.uio.no
