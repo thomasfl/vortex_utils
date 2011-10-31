@@ -34,7 +34,7 @@ class Relativize
 
   end
 
-  def update_file(path)
+  def relativize_file(path)
     html = get_json_content(path)
     puts html
     puts "----------------"
@@ -50,4 +50,4 @@ class Relativize
 end
 
 relativize = Relativize.new('https://www-dav.uio.no/om/samarbeid/samfunn-og-naringsliv/partnerforum/konv/')
-relativize.update_file('/om/samarbeid/samfunn-og-naringsliv/partnerforum/konv/aktiviteter/konferanser/2011/2011-05-26_test.html')
+relativize.relativize_file('/om/samarbeid/samfunn-og-naringsliv/partnerforum/konv/aktiviteter/konferanser/2011/2011-05-26_test.html')
