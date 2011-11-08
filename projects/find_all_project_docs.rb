@@ -18,7 +18,7 @@ class VortexAdminScraper
 
   def initialize(host,driver)
     @host = host
-    @logfile = "personerpresentasjoner_#{host}.log"
+    @logfile = "logs/projects_#{host}.log"
     @adm_host = host.sub('www.','www-adm.')
     if(driver)
       @driver = driver
@@ -30,8 +30,9 @@ class VortexAdminScraper
     vortex_login() # Login to vortex login page
   end
 
-  def find_persons
-    @driver.navigate.to "https://#{@adm_host}/?vrtx=admin&mode=report&report-type=personReporter"
+  def find_projects
+    ### @driver.navigate.to "https://#{@adm_host}/?vrtx=admin&mode=report&report-type=personReporter"
+    @driver.navigate.to "https://#{@adm_host}/?vrtx=admin&mode=report&report-type=structured-projectReporter"
     count = 0
     wait = Selenium::WebDriver::Wait.new(:timeout => 600) # seconds
 
@@ -39,10 +40,10 @@ class VortexAdminScraper
     while(next_link) do
 
       doc = Nokogiri::HTML(@driver.page_source)
-      doc.css("tr.person td[1] a").each do |link|
+      doc.css("tr.structured-project td[1] a").each do |link|
         link.attributes["href"].value
         uri = URI.parse(  link.attributes["href"].value.to_s )
-        log(@host, uri.path)
+        log("https://" + @host + uri.path)
         count = count + 1
         puts count.to_s + ":" + uri.path
       end
@@ -60,7 +61,7 @@ class VortexAdminScraper
   end
 
   # Dead simple logger
-  def log(host, path)
+  def log(string)
     # Empty logfile first:
     if(@dirty_logfile == false)then
       File.open(@logfile, 'w') do |f|
@@ -68,14 +69,14 @@ class VortexAdminScraper
       end
     end
     File.open(@logfile, 'a') do |f|
-      f.write( "#{host}:#{path}\n" )
+      f.write( "#{string.strip}\n" )
     end
     @dirty_logfile = true
   end
 
   # Login if necessary
   def vortex_login
-    @driver.navigate.to "https://#{@adm_host}/?vrtx=admin&mode=report&report-type=personReporter"
+    @driver.navigate.to "https://#{@adm_host}/?vrtx=admin&mode=report&report-type=structured-projectReporter"
     password_field = false
     begin
       password_field = @driver.find_element(:id => 'password')
@@ -97,12 +98,12 @@ end
 if __FILE__ == $0 then
   # 'www.uio.no', 'www.hf.uio.no', 'www.mn.uio.no', 'www.sv.uio.no', 'www.jus.uio.no'
   # 'www.uv.uio.no','www.med.uio.no','www.odont.uio.no','www.tf.uio.no'
-  hosts = ['www.uv.uio.no']
+  hosts = ['www.tf.uio.no']
   driver = nil
   hosts.each do |host|
     scraper = VortexAdminScraper.new(host,driver)
     driver = scraper.driver
-    scraper.find_persons()
+    scraper.find_projects()
   end
   driver.quit
 end
