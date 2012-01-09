@@ -49,9 +49,8 @@ To generate a filename from a title use the 'to_readable_url' method on strings.
 ```ruby
   require 'rubygems'
   require 'vortex_utils'
-
   print "this is a çircûmflexed senteñce".to_readable_url
-
+  # => "this-is-a-circumflexed-sentence"
 ```
 
 # Uploading graphics and other binary files
@@ -63,8 +62,9 @@ To generate a filename from a title use the 'to_readable_url' method on strings.
   require 'json'
   require 'vortex_utils'
 
-  dav = Net::DAV.new('https://vortex-systest-dav.uio.no/test/')
-  dav.put_string('dice_6.gif', open('dice_6.gif).read)
+  dav = Net::DAV.new('https://vortex-systest-dav.uio.no')
+  dav.cd('/test/')
+  dav.put_string('dice_6.gif', open('dice_6.gif').read)
 ```
 
 # Creating folders
@@ -83,5 +83,5 @@ Folders are called collections in WebDAV servers. In Vortex folders can for inst
 
 The document types in vortex can change over time. When creating a script that should publish something to vortex, it's good practice to create a document manually with the admin user interface and look at the generated JSON source. To do this visit the 'About' tab in the admin pages, then click the "Source address" link.
 
-Author Thomas Flemming
+Author: Thomas Flemming
 
