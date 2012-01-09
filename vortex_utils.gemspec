@@ -7,17 +7,10 @@ Gem::Specification.new do |s|
   s.date = %q{2012-01-01}
   s.description = %q{Utilities for managing content on Vortex web content management system through webdav}
   s.email = %q{thomas.flemming@usit.uio.no}
-  s.extra_rdoc_files = [
-    "LICENSE",
-     "README.rdoc"
-  ]
   s.files = [
-     "LICENSE",
-     "README.rdoc",
-     "Rakefile",
      "VERSION",
      "lib/vortex_utils.rb",
-     "lib/vortex_client/string_extensions.rb",
+     "lib/vortex_utils/string_extensions.rb",
   ]
   s.homepage = %q{http://github.com/thomasfl/vortex_utils}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -26,8 +19,8 @@ Gem::Specification.new do |s|
   s.summary = %q{Vortex CMS utilites}
   s.test_files = [
     "test/helper.rb",
-     "test/test_connect.rb",
-     "test/test_string_extensions.rb"
+    "test/test_net_dav_extensions.rb",
+    "test/test_string_extensions.rb"
   ]
 
   if s.respond_to? :specification_version then

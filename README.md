@@ -3,6 +3,14 @@ Vortex CMS Utilities
 
 A small set of utilities for publishing and managing files stored in the Vortex Content Managament System. Uses the 'net_dav' gem to communcate with WebDAV.
 
+# Install
+
+If Ruby and Rubygems package management is installed, simply run the command:
+
+```shell
+  $ gem install vortex_utils
+```
+
 # Hello World
 
 This script will prompt for username and password and publish a simple article.
