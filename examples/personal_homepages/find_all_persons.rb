@@ -67,7 +67,8 @@ class VortexAdminScraper
       end
     end
     File.open(@logfile, 'a') do |f|
-      f.write( "#{host}:#{path}\n" )
+      host = host.sub('www.','www-dav.')
+      f.write( "https://#{host}#{path}\n" )
     end
     @dirty_logfile = true
   end
@@ -94,8 +95,9 @@ class VortexAdminScraper
 end
 
 if __FILE__ == $0 then
-  hosts = ['www.uio.no', 'www.uv.uio.no', 'www.hf.uio.no', 'www.mn.uio.no', 'www.sv.uio.no',
-           'www.jus.uio.no', 'www.uv.uio.no','www.med.uio.no','www.odont.uio.no','www.tf.uio.no']
+  # hosts = ['www.uio.no', 'www.uv.uio.no', 'www.hf.uio.no', 'www.mn.uio.no', 'www.sv.uio.no',
+  #          'www.jus.uio.no', 'www.uv.uio.no','www.med.uio.no','www.odont.uio.no','www.tf.uio.no']
+  hosts = ['www.usit.uio.no']
   driver = nil
   hosts.each do |host|
     scraper = VortexAdminScraper.new(host,driver)

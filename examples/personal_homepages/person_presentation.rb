@@ -7,6 +7,9 @@ require 'pry'
 require './ldap_util'
 require 'json'
 require 'iconv'
+require 'pp'
+require 'cgi'
+require 'pathname'
 
 # PersonPresentation - Query and update information about user presentations stored in Vortex CMS.
 #
@@ -81,9 +84,9 @@ class PersonPresentation
 
   # Look up users realname from ldap directory
   def realname
-    if(username)
+    if(username())
       begin
-        realname = ldap_realname(username)
+        realname = ldap_realname(username())
         ## realname = Iconv.iconv('ascii//ignore//translit', 'utf-8', realname).first.gsub('["','').gsub('"]','')
         # if(realname[/Jakob/])
         #  binding.pry
@@ -126,33 +129,98 @@ class PersonPresentation
     end
   end
 
+  def create_english_from_norwegian(english_path)
+    english_filename = (Pathname.new(english_path) + 'index.html').to_s
+    if(@vortex.exists?(english_filename))
+      # Do not overwrite!
+      puts "Debug: Presentation exists: #{english_filename}"
+      return false
+    else
+
+      # Create folder
+      if(not(@vortex.exists?(english_path)))
+
+        @vortex.mkdir(english_path)
+
+        # Hide from navigation
+        begin
+          @vortex.proppatch(english_path,'<hidden xmlns="http://www.uio.no/navigation">true</hidden>')
+        rescue
+          binding.pry
+          # TODO Log error
+        end
+
+        # Set realname as folder title
+        folder_title = realname().to_s
+        if(not(folder_title) or folder_title == "" )
+          userdata = JSON.parse(@vortex.get(@path))
+          folder_title = userdata['properties']['firstName'].to_s + " " + userdata['properties']['surname'].to_s
+          folder_title = folder_title.strip
+          if(not(folder_title) or folder_title == "")
+            folder_title = username()
+          end
+        end
+
+        puts "Set folder title: '" + folder_title + "'"
+        if(not(folder_title) or folder_title == "" )
+          binding.pry
+          exit
+        end
+        @vortex.proppatch(english_path, '<v:userTitle xmlns:v="vrtx">' + folder_title + '</v:userTitle>')
+      end
+
+    end
+
+    # Read existing data in norwegian
+    data = JSON.parse( @vortex.get(@path) )
+    # Remove norwegian language content
+    data["properties"]["content"] = ""
+    data["properties"]["tags"] = []
+    data["properties"]["related-content"] = ""
+
+    # Copy picture
+    picture = data["properties"]["picture"]
+    if(picture and picture != "")
+      picture_basename = Pathname.new(picture).basename.to_s
+      picture_basename = URI.escape(picture_basename)
+      picture_src = @folder_path + picture_basename
+      picture_content = nil
+      begin
+        picture_content = @vortex.get(picture_src)
+      rescue
+        puts "Error: could not find picture: " + picture_src
+        binding.pry
+      end
+      if(picture_content)
+        new_picture_filename = (Pathname.new(english_path) + picture_basename ).to_s
+        puts "Copying picture: '" + new_picture_filename + "'"
+        @vortex.put_string(new_picture_filename, picture_content)
+      end
+      data["properties"]["picture"] = picture_basename
+    end
+
+    # Create file
+    @vortex.put_string(english_filename, data.to_json)
+
+    # Publish
+    @vortex.proppatch(english_filename, '<v:publish-date xmlns:v="vrtx">' + Time.now.httpdate.to_s + '</v:publish-date>')
+  end
+
 end
 
-# Test and example usage:
 if __FILE__ == $0 then
-  # url = 'https://www-dav.uio.no/personer/adm/usit/web/wapp/thomasfl/index.html'
-  # url = 'https://www-dav.mn.uio.no/gammelt/cees-konvertert/cees-htmluendret/people/technical/tina-graceline/index.html'
-  # url = 'https://www-dav.mn.uio.no/ifi/english/people/aca/amirh/index.html'
-  # url = 'https://www-dav.mn.uio.no/kjemi/english/people/aca/boras/index.html'
-  # url = 'https://www-dav.mn.uio.no/gammelt/cees-konvertert/cees/people/admin/torewall/index.html'
+  # url = 'https://www-dav.usit.uio.no/om/organisasjon/web/wapp/ansatte/thomasfl/index.html'
+  # url = 'https://www-dav.usit.uio.no/om/organisasjon/suaf/fus/ansatte/roynek/index.html'
+  # url = 'https://www-dav.usit.uio.no/om/organisasjon/suaf/so/ansatte/karinar/index.html'
+  # url = 'https://www-dav.usit.uio.no/om/organisasjon/sas/glit/ansatte/norara/index.html'
 
-  # url = 'https://www-dav.tf.uio.no/personer/vit/faste/ingunm/index.html'
-  # url = 'https://www-dav.tf.uio.no/gammelt/%7Ekonvertert-tf-0312a/aks/aksadm/person/index.html'
-  url = 'https://www-dav.tf.uio.no/gammelt/%7Ekonvertert-tf-0312a/aks/aksadm/person/index.html'
+  url = 'https://www-dav.usit.uio.no/english/about/organisation/web/staff/harell/index.html'
+
   vortex = Vortex::Connection.new(url, :osx_keychain => true)
-  person = PersonPresentation.new(vortex,url)
-
-  puts "__________________________________________________"
+  person = PersonPresentation.new(vortex, url)
   puts person.to_s
 
-  if(person.realname != person.folder_title and person.realname)
-    puts "Updating folder title..."
-    person.update_folder_title
-  end
-
-  if(!person.folder_is_hidden?)
-    puts "Hiding person folder..."
-    person.hide_folder
-  end
-
+  # english_path = 'https://www-dav.usit.uio.no/english/about/organisation/sas/glit/staff/norara/'
+  english_path = '/english/about/organisation/web/staff/harell/'
+  person.create_english_from_norwegian(english_path)
 end
