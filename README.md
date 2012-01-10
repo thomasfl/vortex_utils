@@ -81,10 +81,11 @@ Folders are called collections in WebDAV servers. In Vortex folders can for inst
 
 ```ruby
     @dav.mkdir('/test/test-folder')
-    @dav.set_vortex_collection_title('/test/test-folder','En tittel')
+    @dav.set_vortex_collection_title('/test/test-folder','My folder title')
     @dav.set_vortex_collection_type('/test/test-folder','article-listing')
     @dav.hide_vortex_collection('/test/test-folder')
     @dav.delete('/test/test-folder')
+    title = @dav.get_vortex_collection_title('/test/test-folder')  # => Returns "My folder title"
 ```
 
 # Tip: Reverse engingeer Vortex

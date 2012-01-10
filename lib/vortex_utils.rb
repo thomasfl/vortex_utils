@@ -1,4 +1,4 @@
-require_relative 'vortex_utils/string_extensions'
+require 'vortex_utils/string_extensions'
 
 # Utilites used to access the Vortex CMS from the WebDAV protocol and do common tasks
 
@@ -129,6 +129,20 @@ module Net
 
     def hide_vortex_collection(uri)
       proppatch(uri, '<hidden xmlns="http://www.uio.no/navigation">true</hidden>')
+    end
+
+    def get_vortex_collection_title(url)
+      title = nil
+      path = url
+      path = path.sub(/[^\/]*$/,'')
+      begin
+        doc = propfind( path )
+        title = doc.xpath('//v:collectionTitle', "v" => "vrtx").last.children.first.inner_text
+      rescue
+        puts "Warning: Unable to read folder title: " + path
+        title = ""
+      end
+      return title
     end
 
   end

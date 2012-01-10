@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = %q{vortex_utils}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Flemming"]
-  s.date = %q{2012-01-01}
+  s.date = %q{2012-01-10}
   s.description = %q{Utilities for managing content on Vortex web content management system through webdav}
   s.email = %q{thomas.flemming@usit.uio.no}
   s.files = [
